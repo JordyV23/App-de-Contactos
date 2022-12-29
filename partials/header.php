@@ -13,7 +13,10 @@
 
   <!-- Static Content -->
   <link rel="stylesheet" href="./static/css/index.css">
-
+  <?php $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH); ?>
+  <?php if ($uri == "/App-de-Contactos/" || $uri == "/App-de-Contactos/index.php") { ?>
+    <script defer src="./static/js/welcome.js"></script>
+  <?php } ?>
   <title>Contacts App</title>
 </head>
 
@@ -30,7 +33,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href="./index.php">Home</a>
+            <a class="nav-link" href="./home.php">Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="./add.php">Add Contact</a>

@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       ":name" => $_POST["name"],
       ":phone_number" => $_POST["phone_number"]
     ]);
-    header("Location: index.php");
+    header("Location: home.php");
   }
 }
 
