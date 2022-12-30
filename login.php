@@ -1,35 +1,38 @@
 <?php
-require "database.php";
 
-$error = null;
+  require "database.php";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  if (empty($_POST["email"]) || empty($_POST["password"])) {
-    $error = "Por favor, complete todos los campos";
-  } else if (!str_contains($_POST["email"], "@")) {
-    $error = "Formato de correo inválido";
-  } else {
-    $stament = $conn->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
-    $stament->bindParam(":email", $_POST["email"]);
-    $stament->execute();
+  $error = null;
 
-    if ($stament->rowCount() == 0) {
-      $error = "Credencial Correo";
+  if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (empty($_POST["email"]) || empty($_POST["password"])) {
+      $error = "Please fill all the fileds.";
+    } else if (!str_contains($_POST["email"], "@")) {
+      $error = "Email format is incorrect.";
     } else {
-      $user = $stament->fetch(PDO::FETCH_ASSOC);
-      if (!password_verify($_POST["password"], $user["password"])) {
-        var_dump($user);
-        $error = "Credencial Password";
+      $statement = $conn->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
+      $statement->bindParam(":email", $_POST["email"]);
+      $statement->execute();
+
+      if ($statement->rowCount() == 0) {
+        $error = "Invalid credentials.";
       } else {
-        session_start();
-        unset($user["password"]);
-        $_SESSION["user"] = $user;
-        header("Location:home.php");
+        $user = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if (!password_verify($_POST["password"], $user["password"])) {
+          $error = "Invalid credentials.";
+        } else {
+          session_start();
+
+          unset($user["password"]);
+
+          $_SESSION["user"] = $user;
+
+          header("Location: home.php");
+        }
       }
     }
   }
-}
-
 ?>
 
 <?php require "partials/header.php" ?>
