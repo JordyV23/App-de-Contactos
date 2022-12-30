@@ -4,35 +4,28 @@ require "database.php";
 $error = null;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  if (empty($_POST["email"]) || empty($_POST["name"]) || empty($_POST["password"])) {
+  if (empty($_POST["email"]) || empty($_POST["password"])) {
     $error = "Por favor, complete todos los campos";
   } else if (!str_contains($_POST["email"], "@")) {
     $error = "Formato de correo inválido";
   } else {
-    $stament = $conn->prepare("SELECT * FROM users WHERE email = :email");
+    $stament = $conn->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
     $stament->bindParam(":email", $_POST["email"]);
     $stament->execute();
 
-    if ($stament->rowCount() > 0) {
-      $error = "Este correo ya está siendo utilizado";
+    if ($stament->rowCount() == 0) {
+      $error = "Credencial Correo";
     } else {
-      $conn
-        ->prepare("INSERT INTO users (name,email,password) VALUES (:name,:email,:password)")
-        ->execute([
-          ":name" => $_POST["name"],
-          ":email" => $_POST["email"],
-          ":password" => password_hash($_POST["password"], PASSWORD_BCRYPT),
-        ]);
-
-      $stament = $conn->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
-      $stament->bindParam(":email", $_POST["email"]);
-      $stament->execute();
       $user = $stament->fetch(PDO::FETCH_ASSOC);
-
-      session_start();
-      $_SESSION["user"] = $user;
-
-      header("Location:home.php");
+      if (!password_verify($_POST["password"], $user["password"])) {
+        var_dump($user);
+        $error = "Credencial Password";
+      } else {
+        session_start();
+        unset($user["password"]);
+        $_SESSION["user"] = $user;
+        header("Location:home.php");
+      }
     }
   }
 }
@@ -49,13 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
           <p class="text-danger"> <?= $error ?></p>
         <?php endif ?>
         <div class="card-body">
-          <form method="POST" action="register.php">
-            <div class="mb-3 row">
-              <label for="name" class="col-md-4 col-form-label text-md-end">Name</label>
-              <div class="col-md-6">
-                <input id="name" type="text" class="form-control" name="name" required autocomplete="name" autofocus>
-              </div>
-            </div>
+          <form method="POST" action="login.php">
             <div class="mb-3 row">
               <label for="email" class="col-md-4 col-form-label text-md-end">Email</label>
               <div class="col-md-6">
